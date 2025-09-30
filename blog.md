@@ -2,19 +2,19 @@
 
 The world of large-scale AI is a battlefield against bottlenecks. Your expensive, powerful GPUs are often left starved, waiting for data. Rolling out a new model feels like a high-stakes, all-or-nothing gamble. Monolithic serving stacks, while powerful, can be rigid, opaque, and lock you into a single vendor's ecosystem.
 
-What if we could break free from this? What if, instead of a monolithic mainframe, we had a set of specialized, interoperable microservices for our AI infrastructure?
+What if we could break free from this? What if we had a set of specialized, interoperable microservices for our AI infrastructure?
 
 This is the philosophy behind the **BStack**: a collection of four independent, open-source projects that form a composable, high-performance stack for modern AI. This repository demonstrates how they work together, but more importantly, it showcases each component as a powerful tool you can adopt individually.
 
 ## Context: Compiler Technology Meets AI Infrastructure
 
-We built **Bodo**, a high-performance dataframe compiler that JIT-compiles pandas code into optimized parallel native execution. The BStack demonstrates how this compiler technology solves previously intractable AI infrastructure problems—complex planning logic (delta computation, KV-cache orchestration, trace replay) that was too slow in pure Python and too painful to maintain in C++.
+We use **Bodo**, a high-performance dataframe compiler that JIT-compiles pandas code into optimized parallel native execution. The BStack demonstrates how this compiler technology solves previously intractable AI infrastructure problems—complex planning logic (delta computation, KV-cache orchestration, trace replay) that was too slow in pure Python and too painful to maintain in C++.
 
-The result: production-grade performance from readable, maintainable pandas code.
+The goal is to get to production-grade performance from readable, maintainable pandas code.
 
 ---
 
-## The Four Pillars: Stars of the Show
+## The Four Pillars
 
 The BStack is built on four specialized, standalone projects. Each one targets a specific, painful bottleneck in AI systems.
 
@@ -32,7 +32,7 @@ Repo: https://github.com/strangeloopcanon/hotweights
 *   **The Benefit:** **Safe, auditable rollouts with minimal downtime.** Deploy fine-tunes to inference clusters, synchronize weights in distributed training (when shapes match), and roll back with confidence. All operations produce verifiable plans and observable metrics.
 *   **Status & Notes:** Delta planning (Bodo-accelerated) and multi-transport replication are production-ready. Optimizer state preservation works for same-shape updates; shape-changing transforms are stubs. KV cache migration offers conservative dtype/RoPE transforms (validate for your model). Multi-node perf validation and published benchmarks are planned.
 
-### 2. `BCache`: The Intelligent Logistics Layer for Your KV-Cache
+### 2. `BCache`: Intelligent Logistics Layer for Your KV-Cache
 Repo: https://github.com/strangeloopcanon/BCache
 
 *   **The Problem:** Your GPUs are burning cycles waiting for KV-cache data. Simple caching strategies like LRU/FIFO are blind to request patterns, leading to cache misses that stall the entire pipeline, especially in multi-tenant, long-context workloads.
@@ -43,8 +43,8 @@ Repo: https://github.com/strangeloopcanon/BCache
     *   **Multi-Tier Orchestration:** Coordinates movement across storage→CPU→GPU tiers with bandwidth caps, tenant quotas, and deadline-aware scheduling in a single optimization pass.
     *   **Pluggable Architecture:** Planner produces a protobuf-compatible `CachePlan` IR; executors can be engine-native (vLLM/SGLang adapters provided) or standalone (Python simulator, optional native CUDA/HIP/Level Zero backends).
     *   **Experimental Prefix Clustering:** Optional MinHash LSH clustering (A/B flag) for semantic similarity detection across prefixes. This is a research prototype for identifying requests that share KV structure even when prompts differ textually—not enabled by default.
-*   **The Benefit:** **Better GPU utilization and more predictable latency.** The Bodo-compiled planner can make sophisticated I/O decisions fast enough to matter, and the modular design lets you integrate it with existing engines without rewriting executors.
-*   **Status & Notes:** Planner (Bodo JIT) and Python simulator are production-ready. vLLM and SGLang adapters provide integration hooks. Native copy engines (CUDA/HIP) are optional builds. MinHash clustering is experimental (A/B flag). No end-to-end GPU benchmarks in this repo yet; focus is on planning and integration patterns.
+*   **The Benefit:** **Better GPU utilization and more predictable latency.** The Bodo-compiled planner can make complex I/O decisions fast enough to matter, and the modular design should let you integrate it with existing engines without rewriting executors.
+*   **Status & Notes:** Planner (Bodo JIT) and Python simulator are production-ready. vLLM and SGLang adapters provide integration hooks. Native copy engines (CUDA/HIP) are optional builds. MinHash clustering is experimental (A/B flag). No end-to-end GPU benchmarks yet; focus has been on planning and integration patterns.
 
 ### 3. `DataJAX`: "JAX for Data"
 Repo: https://github.com/strangeloopcanon/datajax
@@ -57,7 +57,7 @@ Repo: https://github.com/strangeloopcanon/datajax
     *   **Bodo Backend for Scale:** Lower the IR to Bodo's SPMD compiler to execute the same pandas-like code across an MPI cluster with predictable data partitioning. The `pjit` decorator lets you specify sharding (e.g., `shard.by_key("user_id")`) for distributed execution.
     *   **WaveSpec Generation:** DataJAX can export "wave specifications" (structured execution plans with timing, tile configs, I/O extents) that feed into `BCache` or other planners for offline tuning and replay.
 *   **The Benefit:** **Reproducible, scalable data pipelines.** Trace messy pandas workflows into clean IR, replay them for offline analysis, or scale them across a cluster with Bodo—all from the same high-level code.
-*   **Status & Notes:** Prototype. The trace→IR→plan→execute pipeline works with pandas and Bodo stub backends. Real Bodo lowering requires licensed Bodo installation and MPI environment. IR coverage includes basic filters, joins, and aggregations; UDF-heavy workloads and advanced window functions are future work.
+*   **Status & Notes:** Prototype. The trace→IR→plan→execute pipeline works with pandas and Bodo backends. IR coverage includes basic filters, joins, and aggregations; UDF-heavy workloads and advanced window functions are future work.
 
 ### 4. `bw-runtime`: A Minimal, Swap-Aware Runtime
 Repo: https://github.com/strangeloopcanon/bw-runtime
@@ -70,17 +70,17 @@ Repo: https://github.com/strangeloopcanon/bw-runtime
     *   **Metrics Feedback:** Optional `bwrt_get_caps` and `bwrt_sample` provide runtime counters (e.g., active ops, completion stats) back to planners for closed-loop optimization.
     *   **Portable:** CPU fallback (async events + simple GEMM) works everywhere; CUDA stubs are optional build flags for future GPU-specific features.
 *   **The Benefit:** **A stable seam for integration.** The narrow ABI demonstrates how to wire planner-produced schedules into a runtime without rewriting your engine.
-*   **Status & Notes:** Current implementation is a **CPU fallback** for portability and integration testing. Command ring, sync primitives (barrier/mbarrier), and Python bindings (ctypes/pybind11) are implemented. CUDA stubs are optional. The roadmap targets Blackwell-era device features (persistent kernels, TMA, WGMMA), but the current repo focuses on demonstrating the ABI pattern and proving integration feasibility.
+*   **Status & Notes:** Current implementation is a **CPU fallback** for portability and integration testing. Command ring, sync primitives (barrier/mbarrier), and Python bindings (ctypes/pybind11) are implemented. CUDA stubs are optional. The current repo focuses on demonstrating the ABI pattern and proving integration feasibility.
 
 ---
 
-## The Bodo Advantage: Why It Matters
+## The Bodo Advantage
 
 A key differentiator across `hotweights`, `BCache`, and `DataJAX` is how they leverage **Bodo** to accelerate planning and execution without sacrificing code readability.
 
 **The Problem Space:** AI infrastructure planning—delta computation, bucket packing, KV-cache orchestration—is naturally expressed in dataframe operations. But these problems operate at scale (thousands of concurrent requests, 100k+ weight shards) where pure Python is too slow. The traditional answer was "rewrite in C++," which kills iteration speed and makes the codebase fragile.
 
-**Applying Compiler Technology:** We built Bodo to JIT-compile pandas into optimized parallel native code. BStack demonstrates this technology solving real AI infrastructure bottlenecks. Write planning logic in readable pandas; Bodo compiles it to production-grade performance.
+**Applying Compiler Technology:** BStack demonstrates how Bodo's compiler technology can solve real AI infrastructure bottlenecks. Write planning logic in readable pandas; Bodo compiles it to production-grade performance.
 
 **Measured Impact:**
 - `hotweights`: Delta planning completes sub-second for manifests with 100k-1M shards
@@ -104,7 +104,7 @@ These contracts keep planners and runtimes decoupled while ensuring compatibilit
 
 ## Proof in Action: Running the Stack
 
-Talk is cheap. Let's see the components in action. The `integration/examples/run_stack.py` script in this repository runs a synthetic workload through the entire stack.
+Let's see the components in action. The `integration/examples/run_stack.py` script in this repository runs a synthetic workload through the entire stack.
 
 Example output from one run (values vary per run):
 
@@ -122,22 +122,18 @@ Example output from one run (values vary per run):
   bw-runtime submission succeeded; C= [19.0, 22.0, 43.0, 50.0]
 ```
 
-**What this tells us:**
+**Synthetic pipeilne demo:**
 
 1.  **BCache planned a window of coalesced transfers** with a high prefetch rate, ensuring data is ready ahead of time.
 2.  **hotweights generated a `swap-next` plan**, producing a small delta (32 bytes in this demo) to update 2 items — the core of a zero-downtime update.
 3.  **DataJAX traced the workload** into a clear, three-stage execution plan.
 4.  **bw-runtime successfully received and executed** a small computational wave, proving the end-to-end integration.
 
-This is the power of composition: four independent tools, each generating a precise plan, working in concert.
-
-Note: This is a synthetic pipeline to illustrate composition and interfaces, not a performance benchmark.
-
 ---
 
 ## Architecture: A Layered, Composable Approach
 
-If monolithic servers are mainframes, the BStack is the microservices revolution for AI infrastructure. The key is a layered design where each component has a distinct role, communicating through a tiny, stable API.
+If monolithic servers are mainframes, the BStack is as microservices for AI infrastructure. The key is a layered design where each component has a role, communicating through a tiny, stable API.
 
 ### Modern Architecture Diagram (Mermaid)
 
@@ -317,7 +313,7 @@ These are **well-engineered, composable tools** that solve real problems (delta-
 
 ## Path to Production Validation (Appendix)
 
-**To go from "useful tools" to "industry-proven":**
+**To go beyond "useful tools":**
 
 - **BCache:** Validate on real production traces from multi-tenant serving workloads. Publish benchmarks showing GPU utilization improvement and latency reduction vs baseline (LRU/FIFO). Harden native copy engines (CUDA/HIP) and prove end-to-end with actual vLLM/SGLang clusters.
 
@@ -327,13 +323,13 @@ These are **well-engineered, composable tools** that solve real problems (delta-
 
 - **bw-runtime:** Move from CPU fallback to real device backends with persistent kernels. Surface actual runtime metrics (wgmma_active, tma_occ) from GPU to planners. Validate the ABI pattern with at least one production engine integration.
 
-**The Gap:** Good engineering and promising architecture exist. What's missing are published benchmarks, large-scale validation, and proof that the integration patterns work in real production environments.
+**The Gap:** What's missing are published benchmarks, large-scale validation, and proof that the integration patterns work in real production environments.
 
 ---
 
 ## The Bottom Line
 
-The future of AI infrastructure is not monolithic; it's **composable**.
+The future of AI infrastructure is **composable**.
 
 The BStack demonstrates how **compiler technology** can solve AI infrastructure bottlenecks that were previously stuck between "too slow" and "too complex." Instead of rewriting the world or locking into a monolithic stack, you can leverage specialized, focused tools built on compiled dataframe operations.
 
