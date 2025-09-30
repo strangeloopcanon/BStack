@@ -1,0 +1,45 @@
+PYTHON ?= python3
+VENV ?= .venv
+BIN := $(VENV)/bin
+
+.PHONY: submodules dev-latest bootstrap codegen sync test lint fmt examples clean
+
+submodules:
+	git submodule update --init --recursive
+
+dev-latest:
+	git submodule foreach 'git checkout -q . && git fetch --tags origin'
+	git submodule update --remote --merge
+	@echo "Updated submodules to latest remote HEADs (not committed)."
+
+bootstrap: submodules
+	$(PYTHON) -m venv $(VENV)
+	$(BIN)/python -m pip install --upgrade pip setuptools wheel
+	$(BIN)/pip install -e .[dev]
+	$(BIN)/pip install -e third_party/hotweights
+	$(BIN)/pip install -e third_party/BCache
+	$(BIN)/pip install -e third_party/datajax
+	$(BIN)/pip install -e third_party/bw-runtime/python
+
+codegen:
+	$(BIN)/python scripts/codegen.py
+
+sync:
+	@python scripts/check_lock.py
+
+lint:
+	$(BIN)/ruff check bw_stack integration tests
+
+fmt:
+	$(BIN)/ruff format bw_stack integration tests
+
+pytest:
+	$(BIN)/pytest -m "not gpu" tests
+
+test: pytest
+
+examples:
+	$(BIN)/python integration/examples/run_stack.py
+
+clean:
+	rm -rf $(VENV) build dist *.egg-info

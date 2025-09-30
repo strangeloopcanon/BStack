@@ -1,0 +1,12 @@
+[submodule "third_party/hotweights"]
+	path = third_party/hotweights
+	url = https://github.com/strangeloopcanon/hotweights
+[submodule "third_party/BCache"]
+	path = third_party/BCache
+	url = https://github.com/strangeloopcanon/BCache
+[submodule "third_party/datajax"]
+	path = third_party/datajax
+	url = https://github.com/strangeloopcanon/datajax
+[submodule "third_party/bw-runtime"]
+	path = third_party/bw-runtime
+	url = https://github.com/strangeloopcanon/bw-runtime

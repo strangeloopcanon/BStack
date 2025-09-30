@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package bw.stack;
+
+message FileChunk {
+  string path = 1;
+  uint64 offset = 2;
+  uint64 length = 3;
+  string sha256 = 4;
+}
+
+message WeightManifest {
+  string model_id = 1;
+  string version = 2;
+  repeated FileChunk files = 3;
+}
+
+message SwapWindow {
+  uint64 t_start_ns = 1;
+  uint64 t_deadline_ns = 2;
+}
+
+message KvPageRef {
+  string tensor = 1;
+  uint64 page = 2;
+  uint32 head = 3;
+  uint32 layer = 4;
+}
+
+enum TransferKind {
+  KIND_UNSPECIFIED = 0;
+  H2D = 1;
+  D2H = 2;
+  P2P = 3;
+  STORAGE2H = 4;
+}
+
+message TransferOp {
+  TransferKind kind = 1;
+  string src = 2;
+  string dst = 3;
+  uint64 len = 4;
+  uint64 src_offset = 5;
+  uint64 dst_offset = 6;
+  repeated KvPageRef kv_refs = 7;
+  string note = 8;
+}
+
+message CachePlan {
+  string plan_id = 1;
+  repeated TransferOp ops = 2;
+  repeated KvPageRef prefetch = 3;
+  repeated KvPageRef evict = 4;
+}
+
+message SwapPlan {
+  string plan_id = 1;
+  WeightManifest from = 2;
+  WeightManifest to = 3;
+  repeated TransferOp ops = 4;
+  SwapWindow window = 5;
+}

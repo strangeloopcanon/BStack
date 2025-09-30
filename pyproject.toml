@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bw-stack"
+version = "0.1.0"
+description = "Umbrella integration repo for hotweights, BCache, datajax, and bw-runtime"
+authors = [{ name = "Rohit" }]
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+dependencies = [
+  "protobuf>=4.25.3",
+  "pandas>=2.0",
+  "numpy>=1.24",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "grpcio-tools>=1.62.0",
+  "mypy>=1.6.0",
+  "ruff>=0.5.0",
+  "pytest>=7.4",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["third_party"]
+
+[tool.setuptools.package-data]
+"bw_apis.proto" = ["plan.proto"]
