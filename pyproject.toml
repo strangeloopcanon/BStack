@@ -3,10 +3,10 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "bw-stack"
+name = "bstack"
 version = "0.1.0"
-description = "Umbrella integration repo for hotweights, BCache, datajax, and bw-runtime"
-authors = [{ name = "Rohit" }]
+description = "Umbrella integration repo for hotweights, BCache, datajax, and bstack-runtime"
+authors = [{ name = "The BStack authors" }]
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 dependencies = [
@@ -24,9 +24,11 @@ dev = [
   "pytest>=7.4",
 ]
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
-where = ["."]
-exclude = ["third_party"]
+where = ["src"]
 
 [tool.setuptools.package-data]
-"bw_apis.proto" = ["plan.proto"]
+"bstack_apis" = ["proto/plan.proto"]

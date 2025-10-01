@@ -5,23 +5,21 @@ import os
 from pathlib import Path
 from typing import Optional
 
-import sys
+ROOT = Path(__file__).resolve().parents[3]
 
-ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
 
-from bw_stack.paths import add_third_party_to_path, resolve
+def resolve(*parts: str) -> Path:
+    """Resolve a path relative to the project root."""
+    return ROOT.joinpath(*parts)
 
-add_third_party_to_path()
 
+from integration.data_pipeline import sample_feature_plan
 from integration.kv_data_plane import build_cache_plan, simulate_cache_plan
 from integration.weight_swapper import build_swap_plan, bucket_summary
-from integration.data_pipeline import sample_feature_plan
 
 try:
-    from bwrt.runtime import BwRuntime, WaveSpec
-except Exception:  # pragma: no cover - optional bw-runtime build
+    from bstack_runtime.runtime import BwRuntime, WaveSpec
+except Exception:  # pragma: no cover - optional bstack-runtime build
     BwRuntime = None  # type: ignore
     WaveSpec = None  # type: ignore
 
@@ -46,8 +44,8 @@ def prepare_demo_checkpoints(demo_root: Path) -> tuple[Path, Path]:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description="Run the bw-stack demo pipeline")
-    parser.add_argument("--output", type=Path, default=resolve("integration", "examples", "out"), help="Output directory for generated plans")
+    parser = argparse.ArgumentParser(description="Run the BStack demo pipeline")
+    parser.add_argument("--output", type=Path, default=resolve("out"), help="Output directory for generated plans")
     parser.add_argument("--request-count", type=int, default=200, help="Synthetic requests to generate for the cache plan")
     parser.add_argument("--bucket-mb", type=int, default=32, help="Bucket size passed to hotweights planner")
     args = parser.parse_args(argv)
@@ -63,7 +61,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  ops={len(cache_result.plan.ops)} avg_finish_ms={metrics['avg_finish_ms']:.2f} prefetch={metrics['prefetch_timeliness']:.2f}")
 
     print("[2/3] Generating swap plan via hotweights ...")
-    demo_root = resolve("integration", "examples", "data")
+    demo_root = resolve("src", "integration", "examples", "data")
     prev_dir, next_dir = prepare_demo_checkpoints(demo_root)
     swap_result = build_swap_plan(prev_dir, next_dir, bucket_mb=args.bucket_mb)
     swap_json = out_dir / "swap_plan.json"
@@ -72,12 +70,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  plan_id={swap_result.plan.plan_id} buckets={buckets}")
 
     print("[3/3] Sampling datajax plan ...")
-    datajax_summary = sample_feature_plan()
+    datajax_summary = sample_feature__plan()
     print("  stages=", datajax_summary["stages"])
 
     if BwRuntime is not None:
         try:
-            print("[bonus] Attempting bw-runtime submission (optional) ...")
+            print("[bonus] Attempting bstack-runtime submission (optional) ...")
             import array
 
             rt = BwRuntime()
@@ -91,11 +89,11 @@ def main(argv: Optional[list[str]] = None) -> int:
             c_ptr, _ = C.buffer_info()
             evt = rt.submit_wave(spec, a_ptr, b_ptr, c_ptr)
             rt.wait(evt, timeout_ms=0)
-            print("  bw-runtime submission succeeded; C=", list(C))
+            print("  bstack-runtime submission succeeded; C=", list(C))
         except Exception as exc:  # pragma: no cover - depends on local build
-            print(f"  bw-runtime unavailable: {exc}")
+            print(f"  bstack-runtime unavailable: {exc}")
     else:
-        print("[bonus] bw-runtime Python bindings not installed; skipping runtime probe")
+        print("[bonus] bstack-runtime Python bindings not installed; skipping runtime probe")
 
     print(f"Plans written to {out_dir}")
     return 0
