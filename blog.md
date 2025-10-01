@@ -225,46 +225,46 @@ If monolithic servers are mainframes, the BStack is as microservices for AI infr
 This diagram shows the recommended, engine-friendly posture. The control plane (BStack) orchestrates the data plane (your existing engine's executors) without rewriting kernels.
 
 ```mermaid
-graph TD
-    subgraph "User Space"
-        Clients
-    end
+flowchart TD
 
-    subgraph "Control Plane (The BStack Differentiation)"
-        A[DataJAX: Trace Analysis / WaveSpec Gen]
-        B[BCache: Global KV-Cache Planner]
-        C[hotweights: Versioning & Swap Planner]
-    end
+  subgraph users["User Space"]
+    Clients
+  end
 
-    subgraph "Integration Layer (Tiny IR)"
-        D{Shared Plans: WaveSpec, CachePlan, SwapPlan}
-    end
+  subgraph ctrl["Control Plane (BStack Differentiation)"]
+    A["DataJAX: Trace Analysis / WaveSpec Gen"]
+    B["BCache: Global KV-Cache Planner"]
+    C["Hotweights: Versioning & Swap Planner"]
+  end
 
-    subgraph "Data Plane (Leverage Existing Engines)"
-        E[vLLM / SGLang / TRT-LLM Engine]
-        F[Executors: HiCache / LMCache / KVBM]
-        G[Transports: MPI / UCX / GDS]
-    end
-    
-    subgraph "Device & Kernels"
-        H[Your Existing Kernels]
-        I[bw-runtime (Optional ABI for caps/metrics)]
-    end
+  subgraph integ["Integration Layer (Tiny IR)"]
+    D["Shared Plans: WaveSpec, CachePlan, SwapPlan"]
+  end
 
-    Clients --> E
-    A --> D
-    B --> D
-    C --> D
-    D --> F
-    D --> G
-    E --> F
-    F --> H
-    G --> H
-    F --> I
-    
-    style A fill:#cde4ff,stroke:#333,stroke-width:2px
-    style B fill:#cde4ff,stroke:#333,stroke-width:2px
-    style C fill:#cde4ff,stroke:#333,stroke-width:2px
+  subgraph data["Data Plane (Leverage Existing Engines)"]
+    E["vLLM / SGLang / TRT-LLM Engine"]
+    F["Executors: HiCache / LMCache / KVBM"]
+    G["Transports: MPI / UCX / GDS"]
+  end
+
+  subgraph kern["Device & Kernels"]
+    H["Your Existing Kernels"]
+    I["bw-runtime (Optional ABI for caps/metrics)"]
+  end
+
+  Clients --> E
+  A --> D
+  B --> D
+  C --> D
+  D --> F
+  D --> G
+  F --> H
+  G --> H
+  F --> I
+
+  style A fill:#cde4ff,stroke:#333,stroke-width:2px
+  style B fill:#cde4ff,stroke:#333,stroke-width:2px
+  style C fill:#cde4ff,stroke:#333,stroke-width:2px
 ```
 
 ### Original ASCII Diagram
