@@ -9,20 +9,19 @@ git submodule update --init --recursive  # fetch third_party repos (or use: git 
 make bootstrap        # create .venv and install all editable packages (also initializes submodules)
 make codegen          # regenerate protobuf bindings (requires grpcio-tools)
 make test             # run bw_apis unit tests
-make examples         # produce CachePlan + SwapPlan JSON under integration/examples/out/
+make examples         # produce CachePlan + SwapPlan JSON under out/
 ```
 
 The demo emits two files:
 
-- `cache_plan.json`: synthetic cache transfer plan produced by BCache and normalized to the shared IR.
-- `swap_plan.json`: weight swap plan produced by hotweights from two demo checkpoints.
+- `out/cache_plan.json`: synthetic cache transfer plan produced by BCache and normalized to the shared IR.
+- `out/swap_plan.json`: weight swap plan produced by hotweights from two demo checkpoints.
 
 ## Layout
 
-- `bw_apis/` — shared plan IR (protobuf schema, Python + C++ helpers).
-- `integration/kv_data_plane/` — adapters that call BCache to produce `CachePlan` instances and run the multistream simulator.
-- `integration/weight_swapper/` — adapters that call hotweights to build `SwapPlan` objects from manifests.
-- `integration/examples/run_stack.py` — orchestrates the end-to-end demo.
+- `src/bw_apis/` — shared plan IR (protobuf schema, Python + C++ helpers).
+- `src/integration/` — integration code for submodules.
+- `src/integration/examples/run_stack.py` — orchestrates the end-to-end demo.
 - `ops/` — placeholders for future Docker/compose/Grafana assets.
 - `stack.lock` — pins submodule SHAs; `make sync` verifies they match.
 

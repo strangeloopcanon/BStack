@@ -28,10 +28,10 @@ sync:
 	@python scripts/check_lock.py
 
 lint:
-	$(BIN)/ruff check bw_stack integration tests
+	$(BIN)/ruff check src tests
 
 fmt:
-	$(BIN)/ruff format bw_stack integration tests
+	$(BIN)/ruff format src tests
 
 pytest:
 	$(BIN)/pytest -m "not gpu" tests
@@ -39,7 +39,8 @@ pytest:
 test: pytest
 
 examples:
-	$(BIN)/python integration/examples/run_stack.py
+	$(BIN)/python -m integration.examples.run_stack
 
 clean:
-	rm -rf $(VENV) build dist *.egg-info
+	rm -rf $(VENV) build/ dist/ *.egg-info src/*.egg-info
+	find . -type d -name "__pycache__" -exec rm -r {} +

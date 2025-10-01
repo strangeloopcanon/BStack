@@ -24,9 +24,11 @@ dev = [
   "pytest>=7.4",
 ]
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
-where = ["."]
-exclude = ["third_party"]
+where = ["src"]
 
 [tool.setuptools.package-data]
 "bw_apis.proto" = ["plan.proto"]

@@ -12,7 +12,7 @@ The goal is to provide a thin integration layer with shared plan APIs, demo runn
 ## Highlights
 
 - Pinned submodules under `third_party/` with lock verification (`stack.lock`, `make sync`).
-- Shared plan IR defined in `bw_apis/` (protobuf schema + Python/C++ helpers).
+- Shared plan IR defined in `src/bw_apis/` (protobuf schema + Python/C++ helpers).
 - Synthetic end-to-end demo combining BCache cache plans, hotweights swap plans, DataJAX analytics, and optional bw-runtime probes.
 - Simple Makefile for bootstrapping, codegen, linting, tests, and demo execution.
 
