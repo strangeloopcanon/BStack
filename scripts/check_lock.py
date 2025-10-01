@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import configparser
 import subprocess
 from pathlib import Path
 
@@ -21,15 +22,32 @@ def parse_lock() -> dict[str, str]:
     return entries
 
 
+def get_submodules() -> list[tuple[str, Path]]:
+    """Parse .gitmodules and return a list of (name, path) tuples."""
+    gitmodules_path = ROOT / ".gitmodules"
+    if not gitmodules_path.exists():
+        return []
+
+    config = configparser.ConfigParser()
+    config.read(gitmodules_path)
+
+    modules = []
+    for section in config.sections():
+        path_str = config.get(section, "path", fallback=None)
+        if path_str:
+            path = ROOT / path_str
+            name = path.name
+            modules.append((name, path))
+    return modules
+
+
 def current_shas() -> dict[str, str]:
+    """Get the current HEAD SHA for each submodule."""
     out: dict[str, str] = {}
-    modules = [
-        ("hotweights", ROOT / "third_party" / "hotweights"),
-        ("BCache", ROOT / "third_party" / "BCache"),
-        ("datajax", ROOT / "third_party" / "datajax"),
-        ("bw-runtime", ROOT / "third_party" / "bw-runtime"),
-    ]
+    modules = get_submodules()
     for name, path in modules:
+        if not path.exists():
+            continue
         sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=path).decode().strip()
         out[name] = sha
     return out

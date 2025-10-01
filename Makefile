@@ -25,13 +25,13 @@ codegen:
 	$(BIN)/python scripts/codegen.py
 
 sync:
-	@python scripts/check_lock.py
+	@$(BIN)/python scripts/check_lock.py
 
 lint:
-	$(BIN)/ruff check src tests
+	$(BIN)/ruff check src/bstack src/bstack_apis src/integration tests
 
 fmt:
-	$(BIN)/ruff format src tests
+	$(BIN)/ruff format src/bstack src/bstack_apis src/integration tests
 
 pytest:
 	$(BIN)/pytest -m "not gpu" tests

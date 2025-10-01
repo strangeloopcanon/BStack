@@ -7,8 +7,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PROTO = ROOT / "bw_apis" / "proto" / "plan.proto"
-OUT_PY = ROOT / "bw_apis" / "python"
+PROTO = ROOT / "src" / "bstack_apis" / "proto" / "plan.proto"
+OUT_PY = ROOT / "src" / "bstack_apis" / "python"
 
 
 def run_protoc() -> None:
