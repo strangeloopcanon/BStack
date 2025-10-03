@@ -2,13 +2,13 @@
 
 The world of large-scale AI is a battlefield against bottlenecks. Your expensive, powerful GPUs are often left starved, waiting for data. Rolling out a new model feels like a high-stakes, all-or-nothing gamble. Monolithic serving stacks, while powerful, can be rigid, opaque, and lock you into a single vendor's ecosystem.
 
-This is the philosophy behind the **BStack**: a collection of three independent, open-source projects and one work-in-progress runtime that form a composable, high-performance stack for modern AI. This repository demonstrates how they work together, but more importantly, it showcases each component as a powerful tool you can adopt individually.
+This is my philosophy behind the **BStack**: a collection of three independent, open-source projects and one work-in-progress runtime that form a composable, high-performance stack. This repository demonstrates how they work together, but more importantly, it showcases each component as a powerful tool you can adopt individually.
 
 ## Context: Compiler Technology Meets AI Infrastructure
 
-We use **Bodo**, an open-source, high-performance dataframe compiler that JIT-compiles pandas code into optimized parallel native execution. You can find its source on [GitHub](https://github.com/bodo-ai/Bodo) and its documentation [here](https://docs.bodo.ai/). The BStack demonstrates how this compiler technology solves previously intractable AI infrastructure problems—complex planning logic (delta computation, KV-cache orchestration, trace replay) that was too slow in pure Python and too painful to maintain in C++.
+This uses **Bodo**, an open-source, high-performance dataframe compiler that JIT-compiles pandas code into optimized parallel native execution. You can find its source on [GitHub](https://github.com/bodo-ai/Bodo) and its documentation [here](https://docs.bodo.ai/). The BStack demonstrates how this compiler technology solves previously intractable AI infrastructure problems—complex planning logic (delta computation, KV-cache orchestration, trace replay) that was too slow in pure Python and too painful to maintain in C++.
 
-The goal is to get to production-grade performance from readable, maintainable pandas code.
+The goal is to get to production-grade performance from readable, maintainable pandas like code.
 
 ---
 
