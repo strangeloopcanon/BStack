@@ -2,8 +2,6 @@
 
 The world of large-scale AI is a battlefield against bottlenecks. Your expensive, powerful GPUs are often left starved, waiting for data. Rolling out a new model feels like a high-stakes, all-or-nothing gamble. Monolithic serving stacks, while powerful, can be rigid, opaque, and lock you into a single vendor's ecosystem.
 
-What if we could break free from this? What if we had a set of specialized, interoperable microservices for our AI infrastructure?
-
 This is the philosophy behind the **BStack**: a collection of three independent, open-source projects and one work-in-progress runtime that form a composable, high-performance stack for modern AI. This repository demonstrates how they work together, but more importantly, it showcases each component as a powerful tool you can adopt individually.
 
 ## Context: Compiler Technology Meets AI Infrastructure
