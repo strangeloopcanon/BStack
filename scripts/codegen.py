@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate protobuf bindings for bw_apis."""
+"""Generate protobuf bindings for bstack_apis."""
 from __future__ import annotations
 
 import subprocess

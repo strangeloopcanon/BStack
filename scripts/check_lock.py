@@ -41,10 +41,9 @@ def get_submodules() -> list[tuple[str, Path]]:
     return modules
 
 
-def current_shas() -> dict[str, str]:
+def current_shas(modules: list[tuple[str, Path]]) -> dict[str, str]:
     """Get the current HEAD SHA for each submodule."""
     out: dict[str, str] = {}
-    modules = get_submodules()
     for name, path in modules:
         if not path.exists():
             continue
@@ -53,9 +52,24 @@ def current_shas() -> dict[str, str]:
     return out
 
 
+def dirty_submodule_entries(modules: list[tuple[str, Path]]) -> dict[str, list[str]]:
+    """Return git porcelain lines for submodules with local changes."""
+    dirty: dict[str, list[str]] = {}
+    for name, path in modules:
+        if not path.exists():
+            continue
+        lines = subprocess.check_output(["git", "status", "--porcelain"], cwd=path).decode().splitlines()
+        lines = [line for line in lines if line.strip()]
+        if lines:
+            dirty[name] = lines
+    return dirty
+
+
 def main():
     lock = parse_lock()
-    current = current_shas()
+    modules = get_submodules()
+    current = current_shas(modules)
+    dirty = dirty_submodule_entries(modules)
     mismatches = []
     for name, sha in current.items():
         in_lock = lock.get(name)
@@ -64,6 +78,11 @@ def main():
             continue
         if in_lock != sha:
             mismatches.append(f"{name}: lock={in_lock[:8]} current={sha[:8]}")
+    for name, entries in dirty.items():
+        preview = ", ".join(entries[:3])
+        if len(entries) > 3:
+            preview = f"{preview}, ..."
+        mismatches.append(f"{name}: has uncommitted changes ({preview})")
     for name in lock:
         if name not in current:
             mismatches.append(f"{name}: present in lock but submodule missing")

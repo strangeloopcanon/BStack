@@ -16,8 +16,9 @@ PSF_LICENSE.txt
 Thumbs.db
 .python-version
 .envrc
-integration/examples/out/
-integration/examples/data/
+src/integration/examples/out/
+src/integration/examples/data/
+out/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/

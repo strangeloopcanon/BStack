@@ -8,7 +8,7 @@ submodules:
 	git submodule update --init --recursive
 
 dev-latest:
-	git submodule foreach 'git checkout -q . && git fetch --tags origin'
+	git submodule foreach 'git fetch --tags origin'
 	git submodule update --remote --merge
 	@echo "Updated submodules to latest remote HEADs (not committed)."
 

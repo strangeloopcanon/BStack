@@ -1,16 +1,12 @@
 from __future__ import annotations
 
 import argparse
-import os
 from pathlib import Path
 from typing import Optional
 
-ROOT = Path(__file__).resolve().parents[3]
+from bstack.paths import add_third_party_to_path, resolve
 
-
-def resolve(*parts: str) -> Path:
-    """Resolve a path relative to the project root."""
-    return ROOT.joinpath(*parts)
+add_third_party_to_path()
 
 
 from integration.data_pipeline import sample_feature_plan
@@ -18,7 +14,7 @@ from integration.kv_data_plane import build_cache_plan, simulate_cache_plan
 from integration.weight_swapper import build_swap_plan, bucket_summary
 
 try:
-    from bstack_runtime.runtime import BwRuntime, WaveSpec
+    from bwrt.runtime import BwRuntime, WaveSpec
 except Exception:  # pragma: no cover - optional bstack-runtime build
     BwRuntime = None  # type: ignore
     WaveSpec = None  # type: ignore
@@ -70,7 +66,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"  plan_id={swap_result.plan.plan_id} buckets={buckets}")
 
     print("[3/3] Sampling datajax plan ...")
-    datajax_summary = sample_feature__plan()
+    datajax_summary = sample_feature_plan()
     print("  stages=", datajax_summary["stages"])
 
     if BwRuntime is not None:
