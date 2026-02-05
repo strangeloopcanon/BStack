@@ -15,5 +15,6 @@ The goal is to provide a thin integration layer with shared plan APIs, demo runn
 - Shared plan IR defined in `src/bstack_apis/` (protobuf schema + Python/C++ helpers).
 - Synthetic end-to-end demo combining BCache cache plans, hotweights swap plans, DataJAX analytics, and optional bstack-runtime probes.
 - Simple Makefile for bootstrapping, codegen, linting, tests, and demo execution.
+- Bootstrap pins a NumPy-compatible range for the SciPy/Numba stack used by integration dependencies.
 
 See `docs/README.md` for full usage details.
