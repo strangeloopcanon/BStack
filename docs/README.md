@@ -32,6 +32,7 @@ Submodules live in `third_party/` and are locked to explicit SHAs. Modify a comp
 ## Runtime Notes
 
 - The integration forces pure-Python fallback paths (`BODOCACHE_PURE_PY=1`, `HOTWEIGHTS_FORCE_PANDAS=1`) so the demo runs without Bodo.
+- The bootstrap flow pins `numpy<2.3` to avoid SciPy/Numba compatibility warnings observed with newer NumPy releases.
 - `bstack-runtime` requires a compiled shared library. The demo script probes the Python bindings and reports if the library is missing.
 - `datajax` is installed for completeness; glue code will live in future iterations once plan consumers iterate on the IR.
 

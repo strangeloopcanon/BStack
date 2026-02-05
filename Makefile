@@ -15,6 +15,7 @@ dev-latest:
 bootstrap: submodules
 	$(PYTHON) -m venv $(VENV)
 	$(BIN)/python -m pip install --upgrade pip setuptools wheel
+	$(BIN)/pip install "numpy>=1.24,<2.3"
 	$(BIN)/pip install -e .[dev]
 	$(BIN)/pip install -e third_party/hotweights
 	$(BIN)/pip install -e third_party/BCache

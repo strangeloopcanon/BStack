@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import pandas as pd
 
+from bstack.paths import add_third_party_to_path
+
+add_third_party_to_path()
+
 from datajax.api import djit
 from datajax.frame.frame import Frame
 
