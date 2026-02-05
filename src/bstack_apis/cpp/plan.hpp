@@ -14,10 +14,11 @@ struct KvPageRef {
 };
 
 enum class TransferKind : std::uint32_t {
-    H2D = 0,
-    D2H = 1,
-    P2P = 2,
-    STORAGE2H = 3,
+    KIND_UNSPECIFIED = 0,
+    H2D = 1,
+    D2H = 2,
+    P2P = 3,
+    STORAGE2H = 4,
 };
 
 struct TransferOp {

@@ -6,7 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Optional
 
-from bw_apis import (
+from bstack.paths import add_third_party_to_path
+from bstack_apis import (
     FileChunk,
     SwapPlan,
     SwapWindow,
@@ -16,7 +17,6 @@ from bw_apis import (
     file_chunk,
     swap_plan,
 )
-from bw_stack.paths import add_third_party_to_path
 
 add_third_party_to_path()
 

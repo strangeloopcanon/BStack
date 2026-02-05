@@ -7,8 +7,8 @@ from typing import Dict, Optional
 
 import pandas as pd
 
-from bw_apis import CachePlan, KvPageRef, TransferKind, TransferOp, cache_plan
-from bw_stack.paths import add_third_party_to_path, resolve
+from bstack.paths import add_third_party_to_path, resolve
+from bstack_apis import CachePlan, KvPageRef, TransferKind, TransferOp, cache_plan
 
 add_third_party_to_path()
 
