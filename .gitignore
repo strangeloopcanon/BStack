@@ -27,8 +27,6 @@ coverage.xml
 htmlcov/
 .cache/
 *.log
-blog_analysis.md
-idea.md
 
 .env
 env/
