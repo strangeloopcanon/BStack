@@ -35,6 +35,10 @@ def sample_feature_plan() -> dict:
         "backend": exec_record.backend,
         "mode": exec_record.backend_mode,
         "stages": plan.describe(),
+        # New in datajax: full plan introspection with sharding + metrics.
+        "explain": plan.explain(include_metrics=True)
+        if hasattr(plan, "explain")
+        else "",
         "output_preview": result.to_pandas().reset_index().to_dict(orient="records"),
     }
     return summary

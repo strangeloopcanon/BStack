@@ -2,7 +2,7 @@ PYTHON ?= python3
 VENV ?= .venv
 BIN := $(VENV)/bin
 
-.PHONY: submodules dev-latest bootstrap codegen sync test lint fmt examples clean
+.PHONY: submodules dev-latest bootstrap codegen sync test lint fmt examples clean bench demo-kv demo-swap demos
 
 submodules:
 	git submodule update --init --recursive
@@ -20,7 +20,7 @@ bootstrap: submodules
 	$(BIN)/pip install -e third_party/hotweights
 	$(BIN)/pip install -e third_party/BCache
 	$(BIN)/pip install -e third_party/datajax
-	$(BIN)/pip install -e third_party/bw-runtime/python
+	$(BIN)/pip install -e third_party/bw-runtime
 
 codegen:
 	$(BIN)/python scripts/codegen.py
@@ -35,12 +35,23 @@ fmt:
 	$(BIN)/ruff format src/bstack src/bstack_apis src/integration tests
 
 pytest:
-	$(BIN)/pytest -m "not gpu" tests
+	$(BIN)/pytest -m "not gpu" tests src/integration/bench
 
 test: pytest
 
+bench:
+	$(BIN)/pytest -m "bench" src/integration/bench -s
+
 examples:
 	$(BIN)/python -m integration.examples.run_stack
+
+demo-kv:
+	$(BIN)/python -m integration.examples.run_kv_tiering
+
+demo-swap:
+	$(BIN)/python -m integration.examples.run_swap_kv
+
+demos: examples demo-kv demo-swap
 
 clean:
 	rm -rf $(VENV) build/ dist/ *.egg-info src/*.egg-info
