@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import time
 from dataclasses import dataclass
-from typing import Dict, Optional
 
 import pandas as pd
 
@@ -12,6 +11,7 @@ from bstack_apis import CachePlan, KvPageRef, TransferKind, TransferOp, cache_pl
 
 add_third_party_to_path()
 
+from bodocache.agent.sim_node import simulate_plan_streams, summarize_metrics
 from bodocache.config import RuntimeConfig, load_config_typed
 from bodocache.planner.cluster import assign_pclusters_minhash
 from bodocache.planner.scheduler import run_window
@@ -22,7 +22,6 @@ from bodocache.sim.utils import (
     synthetic_tenant_caps,
     synthetic_tier_caps,
 )
-from bodocache.agent.sim_node import simulate_plan_streams, summarize_metrics
 
 
 @dataclass
@@ -36,12 +35,16 @@ class CachePlanResult:
     cfg: RuntimeConfig
 
 
-def build_cache_plan(*, now_ms: Optional[int] = None, window_id: Optional[str] = None, request_count: int = 200) -> CachePlanResult:
+def build_cache_plan(
+    *, now_ms: int | None = None, window_id: str | None = None, request_count: int = 200
+) -> CachePlanResult:
     """Generate a CachePlan using the synthetic BCache workload."""
 
     os.environ.setdefault("BODOCACHE_PURE_PY", "1")
 
-    cfg = load_config_typed(runtime_path=str(resolve("third_party", "BCache", "configs", "runtime.yaml")))
+    cfg = load_config_typed(
+        runtime_path=str(resolve("third_party", "BCache", "configs", "runtime.yaml"))
+    )
     req = synthetic_requests(n_req=request_count)
 
     if cfg.ab_flags.enable_prefix_fanout:
@@ -88,7 +91,7 @@ def build_cache_plan(*, now_ms: Optional[int] = None, window_id: Optional[str] =
     )
 
 
-def simulate_cache_plan(result: CachePlanResult) -> Dict[str, float]:
+def simulate_cache_plan(result: CachePlanResult) -> dict[str, float]:
     """Feed the plan to the built-in multistream simulator to obtain metrics."""
 
     exec_df = simulate_plan_streams(
@@ -107,7 +110,12 @@ def simulate_cache_plan(result: CachePlanResult) -> Dict[str, float]:
     }
 
 
-def _convert_to_cache_plan(plan_id: str, plan_df: pd.DataFrame, evict_df: pd.DataFrame, admission_df: pd.DataFrame) -> CachePlan:
+def _convert_to_cache_plan(
+    plan_id: str,
+    plan_df: pd.DataFrame,
+    evict_df: pd.DataFrame,
+    admission_df: pd.DataFrame,
+) -> CachePlan:
     ops = []
     for row in plan_df.itertuples(index=False):
         tier_src = int(getattr(row, "tier_src", 0))
@@ -119,7 +127,9 @@ def _convert_to_cache_plan(plan_id: str, plan_df: pd.DataFrame, evict_df: pd.Dat
         end_pid = int(getattr(row, "end_pid", start_pid))
         page_bytes = int(getattr(row, "page_bytes", 256 * 1024))
         kv_refs = [
-            KvPageRef(tensor="kv", page=pid, head=0, layer=int(getattr(row, "layer", 0)))
+            KvPageRef(
+                tensor="kv", page=pid, head=0, layer=int(getattr(row, "layer", 0))
+            )
             for pid in range(start_pid, end_pid + 1)
         ]
         note = f"cluster={getattr(row, 'pcluster', 0)} fanout={getattr(row, 'fanout', 1)} overlap={getattr(row, 'overlap', 1)}"
@@ -137,11 +147,21 @@ def _convert_to_cache_plan(plan_id: str, plan_df: pd.DataFrame, evict_df: pd.Dat
         )
 
     prefetch = [
-        KvPageRef(tensor="kv", page=int(getattr(row, "page_id", 0)), head=0, layer=int(getattr(row, "layer", 0)))
+        KvPageRef(
+            tensor="kv",
+            page=int(getattr(row, "page_id", 0)),
+            head=0,
+            layer=int(getattr(row, "layer", 0)),
+        )
         for row in admission_df.itertuples(index=False)
     ]
     evict = [
-        KvPageRef(tensor="kv", page=int(getattr(row, "page_id", 0)), head=0, layer=int(getattr(row, "layer", 0)))
+        KvPageRef(
+            tensor="kv",
+            page=int(getattr(row, "page_id", 0)),
+            head=0,
+            layer=int(getattr(row, "layer", 0)),
+        )
         for row in evict_df.itertuples(index=False)
     ]
 

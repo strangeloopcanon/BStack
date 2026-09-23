@@ -1,0 +1,27 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Bootstrap
+        run: make bootstrap
+      - name: Lint
+        run: make lint
+      - name: Tests
+        run: make test
+      - name: Demos
+        run: make demos
+      - name: Benchmark (smoke)
+        run: .venv/bin/python -m integration.examples.run_kv_tiering --sessions 8 --requests 96 --layers 4 --windows 4 --gpu-pages 512 --bandwidth-mb 64

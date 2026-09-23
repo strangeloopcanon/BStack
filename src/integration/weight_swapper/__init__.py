@@ -1,5 +1,5 @@
 """hotweights swap plan adapter."""
 
-from .runner import build_swap_plan, bucket_summary
+from .runner import bucket_summary, build_swap_plan
 
-__all__ = ["build_swap_plan", "bucket_summary"]
+__all__ = ["bucket_summary", "build_swap_plan"]
