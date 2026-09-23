@@ -1,6 +1,6 @@
 # BStack Umbrella
 
-This repository composes the `hotweights`, `BCache`, `datajax`, and `bw-runtime` projects behind a thin shared API. It locks component SHAs via submodules and publishes integration demos so you can inspect the seams without collapsing into a monorepo.
+This repository composes the `hotweights`, `BCache`, `datajax`, and `bstack-runtime` projects behind a thin shared API. It locks component SHAs via submodules and publishes integration demos so you can inspect the seams without collapsing into a monorepo.
 
 ## Quick Start
 
@@ -22,6 +22,7 @@ The demo emits two files:
 - `src/bstack_apis/` — shared plan IR (protobuf schema, Python + C++ helpers).
 - `src/integration/` — integration code for submodules.
 - `src/integration/examples/run_stack.py` — orchestrates the end-to-end demo.
+- `ops/` — placeholders for future Docker/compose/Grafana assets.
 - `stack.lock` — pins submodule SHAs; `make sync` verifies they match.
 
 ## Submodule Policy
@@ -38,6 +39,11 @@ Submodules live in `third_party/` and are locked to explicit SHAs. Modify a comp
 ## Next Steps
 
 1. Flesh out protobuf code generation (publish wheel/tarball with generated stubs).
-2. Replace synthetic workloads with actual datajax traces feeding BCache planners.
+2. ~~Replace synthetic workloads with actual datajax traces feeding BCache planners.~~
+   Done (2026-09-22): `src/integration/kv_tiering/` drives BCache's `plan_window`
+   from a seeded serving trace; `datajax_bridge.py` uses the new
+   `ExecutionPlan.explain()` API.
 3. Wire `bstack-runtime` execution once PCIe/GPU paths are available or a CPU fallback lands upstream.
-4. Extend `integration/bench/` with reproducible benchmarks gated in CI.
+4. ~~Extend `integration/bench/` with reproducible benchmarks gated in CI.~~
+   Done (2026-09-22): `src/integration/bench/test_planner_bench.py` with
+   small/medium/large CPU-only cases; CI runs bootstrap, lint, tests and demos.

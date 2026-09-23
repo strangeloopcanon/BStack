@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass, field, fields
 from enum import Enum
 from pathlib import Path
-from typing import Iterable, List, Optional
 
 
 class TransferKind(str, Enum):
@@ -16,7 +16,7 @@ class TransferKind(str, Enum):
     STORAGE2H = "STORAGE2H"
 
     @classmethod
-    def from_string(cls, value: str | None) -> "TransferKind":
+    def from_string(cls, value: str | None) -> TransferKind:
         if not value:
             return cls.STORAGE2H
         try:
@@ -41,7 +41,7 @@ class TransferOp:
     length: int
     src_offset: int = 0
     dst_offset: int = 0
-    kv_refs: List[KvPageRef] = field(default_factory=list)
+    kv_refs: list[KvPageRef] = field(default_factory=list)
     note: str | None = None
 
 
@@ -57,7 +57,7 @@ class FileChunk:
 class WeightManifest:
     model_id: str
     version: str
-    files: List[FileChunk]
+    files: list[FileChunk]
 
 
 @dataclass
@@ -69,9 +69,9 @@ class SwapWindow:
 @dataclass
 class CachePlan:
     plan_id: str
-    ops: List[TransferOp]
-    prefetch: List[KvPageRef] = field(default_factory=list)
-    evict: List[KvPageRef] = field(default_factory=list)
+    ops: list[TransferOp]
+    prefetch: list[KvPageRef] = field(default_factory=list)
+    evict: list[KvPageRef] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return _to_dict(self)
@@ -88,7 +88,7 @@ class SwapPlan:
     plan_id: str
     manifest_from: WeightManifest
     manifest_to: WeightManifest
-    ops: List[TransferOp]
+    ops: list[TransferOp]
     window: SwapWindow
 
     def to_dict(self) -> dict:
@@ -141,8 +141,19 @@ def transfer_op(kind: str | TransferKind, **kwargs) -> TransferOp:
     return TransferOp(kind=kind, **kwargs)
 
 
-def cache_plan(plan_id: str, ops: Iterable[TransferOp], *, prefetch: Iterable[KvPageRef] | None = None, evict: Iterable[KvPageRef] | None = None) -> CachePlan:
-    return CachePlan(plan_id=plan_id, ops=list(ops), prefetch=list(prefetch or []), evict=list(evict or []))
+def cache_plan(
+    plan_id: str,
+    ops: Iterable[TransferOp],
+    *,
+    prefetch: Iterable[KvPageRef] | None = None,
+    evict: Iterable[KvPageRef] | None = None,
+) -> CachePlan:
+    return CachePlan(
+        plan_id=plan_id,
+        ops=list(ops),
+        prefetch=list(prefetch or []),
+        evict=list(evict or []),
+    )
 
 
 def swap_plan(
@@ -153,10 +164,18 @@ def swap_plan(
     *,
     window: SwapWindow,
 ) -> SwapPlan:
-    return SwapPlan(plan_id=plan_id, manifest_from=manifest_from, manifest_to=manifest_to, ops=list(ops), window=window)
+    return SwapPlan(
+        plan_id=plan_id,
+        manifest_from=manifest_from,
+        manifest_to=manifest_to,
+        ops=list(ops),
+        window=window,
+    )
 
 
-def weight_manifest(model_id: str, version: str, files: Iterable[FileChunk]) -> WeightManifest:
+def weight_manifest(
+    model_id: str, version: str, files: Iterable[FileChunk]
+) -> WeightManifest:
     return WeightManifest(model_id=model_id, version=version, files=list(files))
 
 
@@ -223,12 +242,24 @@ def _manifest_from_dict(payload: dict) -> WeightManifest:
 def _swap_plan_from_dict(payload: dict) -> SwapPlan:
     return SwapPlan(
         plan_id=str(payload.get("plan_id", "")),
-        manifest_from=_manifest_from_dict(payload.get("manifest_from", payload.get("from", {}))),
-        manifest_to=_manifest_from_dict(payload.get("manifest_to", payload.get("to", {}))),
+        manifest_from=_manifest_from_dict(
+            payload.get("manifest_from", payload.get("from", {}))
+        ),
+        manifest_to=_manifest_from_dict(
+            payload.get("manifest_to", payload.get("to", {}))
+        ),
         ops=[_transfer_op_from_dict(op) for op in payload.get("ops", [])],
         window=SwapWindow(
-            t_start_ns=int(payload.get("window", {}).get("t_start_ns", payload.get("window", {}).get("start_ns", 0))),
-            t_deadline_ns=int(payload.get("window", {}).get("t_deadline_ns", payload.get("window", {}).get("deadline_ns", 0))),
+            t_start_ns=int(
+                payload.get("window", {}).get(
+                    "t_start_ns", payload.get("window", {}).get("start_ns", 0)
+                )
+            ),
+            t_deadline_ns=int(
+                payload.get("window", {}).get(
+                    "t_deadline_ns", payload.get("window", {}).get("deadline_ns", 0)
+                )
+            ),
         ),
     )
 
@@ -243,21 +274,21 @@ def _cache_plan_from_dict(payload: dict) -> CachePlan:
 
 
 __all__ = [
-    "TransferKind",
-    "KvPageRef",
-    "TransferOp",
     "CachePlan",
-    "SwapPlan",
-    "WeightManifest",
-    "SwapWindow",
     "FileChunk",
-    "kv_ref",
-    "transfer_op",
+    "KvPageRef",
+    "SwapPlan",
+    "SwapWindow",
+    "TransferKind",
+    "TransferOp",
+    "WeightManifest",
     "cache_plan",
-    "swap_plan",
-    "weight_manifest",
     "file_chunk",
-    "swap_window",
+    "kv_ref",
     "load_cache_plan",
     "load_swap_plan",
+    "swap_plan",
+    "swap_window",
+    "transfer_op",
+    "weight_manifest",
 ]

@@ -24,4 +24,4 @@ def add_third_party_to_path() -> None:
             sys.path.insert(0, path_str)
 
 
-__all__ = ["ROOT", "resolve", "add_third_party_to_path"]
+__all__ = ["ROOT", "add_third_party_to_path", "resolve"]

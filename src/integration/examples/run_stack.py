@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import Optional
 
 from bstack.paths import add_third_party_to_path, resolve
 
@@ -11,11 +10,11 @@ add_third_party_to_path()
 
 from integration.data_pipeline import sample_feature_plan
 from integration.kv_data_plane import build_cache_plan, simulate_cache_plan
-from integration.weight_swapper import build_swap_plan, bucket_summary
+from integration.weight_swapper import bucket_summary, build_swap_plan
 
 try:
     from bwrt.runtime import BwRuntime, WaveSpec
-except Exception:  # pragma: no cover - optional bstack-runtime build
+except Exception:  # noqa: BLE001 # pragma: no cover - optional bstack-runtime build
     BwRuntime = None  # type: ignore
     WaveSpec = None  # type: ignore
 
@@ -39,11 +38,26 @@ def prepare_demo_checkpoints(demo_root: Path) -> tuple[Path, Path]:
     return prev_dir, next_dir
 
 
-def main(argv: Optional[list[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the BStack demo pipeline")
-    parser.add_argument("--output", type=Path, default=resolve("out"), help="Output directory for generated plans")
-    parser.add_argument("--request-count", type=int, default=200, help="Synthetic requests to generate for the cache plan")
-    parser.add_argument("--bucket-mb", type=int, default=32, help="Bucket size passed to hotweights planner")
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=resolve("out"),
+        help="Output directory for generated plans",
+    )
+    parser.add_argument(
+        "--request-count",
+        type=int,
+        default=200,
+        help="Synthetic requests to generate for the cache plan",
+    )
+    parser.add_argument(
+        "--bucket-mb",
+        type=int,
+        default=32,
+        help="Bucket size passed to hotweights planner",
+    )
     args = parser.parse_args(argv)
 
     out_dir: Path = args.output
@@ -54,7 +68,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     cache_json = out_dir / "cache_plan.json"
     cache_result.plan.to_json(cache_json)
     metrics = simulate_cache_plan(cache_result)
-    print(f"  ops={len(cache_result.plan.ops)} avg_finish_ms={metrics['avg_finish_ms']:.2f} prefetch={metrics['prefetch_timeliness']:.2f}")
+    print(
+        f"  ops={len(cache_result.plan.ops)} avg_finish_ms={metrics['avg_finish_ms']:.2f} prefetch={metrics['prefetch_timeliness']:.2f}"
+    )
 
     print("[2/3] Generating swap plan via hotweights ...")
     demo_root = resolve("src", "integration", "examples", "data")
@@ -77,19 +93,21 @@ def main(argv: Optional[list[str]] = None) -> int:
             rt = BwRuntime()
             # Small 2x2 GEMM-style wave on CPU backend using host arrays
             spec = WaveSpec(bm=2, bn=2, bk=2, swap_begin=0, swap_end=3)
-            A = array.array('f', [1, 2, 3, 4])
-            B = array.array('f', [5, 6, 7, 8])
-            C = array.array('f', [0, 0, 0, 0])
+            A = array.array("f", [1, 2, 3, 4])
+            B = array.array("f", [5, 6, 7, 8])
+            C = array.array("f", [0, 0, 0, 0])
             a_ptr, _ = A.buffer_info()
             b_ptr, _ = B.buffer_info()
             c_ptr, _ = C.buffer_info()
             evt = rt.submit_wave(spec, a_ptr, b_ptr, c_ptr)
             rt.wait(evt, timeout_ms=0)
             print("  bstack-runtime submission succeeded; C=", list(C))
-        except Exception as exc:  # pragma: no cover - depends on local build
+        except Exception as exc:  # noqa: BLE001 # pragma: no cover - depends on local build
             print(f"  bstack-runtime unavailable: {exc}")
     else:
-        print("[bonus] bstack-runtime Python bindings not installed; skipping runtime probe")
+        print(
+            "[bonus] bstack-runtime Python bindings not installed; skipping runtime probe"
+        )
 
     print(f"Plans written to {out_dir}")
     return 0

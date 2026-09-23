@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import os
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Optional
 
 from bstack.paths import add_third_party_to_path
 from bstack_apis import (
@@ -20,8 +20,8 @@ from bstack_apis import (
 
 add_third_party_to_path()
 
-from hotweights.manifest import build_simple_manifest
 from hotweights.core.replicate import create_plan
+from hotweights.manifest import build_simple_manifest
 
 
 @dataclass
@@ -40,14 +40,18 @@ def build_swap_plan(
     prev_version: str = "prev",
     next_version: str = "next",
     bucket_mb: int = 32,
-    deadline_ns: Optional[int] = None,
+    deadline_ns: int | None = None,
 ) -> SwapPlanResult:
     """Produce a SwapPlan by diffing two checkpoint directories."""
 
     os.environ.setdefault("HOTWEIGHTS_FORCE_PANDAS", "1")
 
-    prev_manifest_raw = build_simple_manifest(model_id=model_id, version=prev_version, checkpoint_dir=str(prev_checkpoint))
-    next_manifest_raw = build_simple_manifest(model_id=model_id, version=next_version, checkpoint_dir=str(next_checkpoint))
+    prev_manifest_raw = build_simple_manifest(
+        model_id=model_id, version=prev_version, checkpoint_dir=str(prev_checkpoint)
+    )
+    next_manifest_raw = build_simple_manifest(
+        model_id=model_id, version=next_version, checkpoint_dir=str(next_checkpoint)
+    )
 
     prev_manifest = _to_weight_manifest(prev_manifest_raw)
     next_manifest = _to_weight_manifest(next_manifest_raw)
@@ -56,7 +60,9 @@ def build_swap_plan(
     buckets = list(bucket_plan.get("buckets", []))
     plan_id = f"swap-{next_manifest.version}"
     start_ns = time.time_ns()
-    deadline_ns = deadline_ns if deadline_ns is not None else start_ns + 5_000_000_000  # +5s
+    deadline_ns = (
+        deadline_ns if deadline_ns is not None else start_ns + 5_000_000_000
+    )  # +5s
 
     ops: list[TransferOp] = []
     for bucket in buckets:
@@ -90,7 +96,12 @@ def build_swap_plan(
         window=SwapWindow(t_start_ns=start_ns, t_deadline_ns=deadline_ns),
     )
 
-    return SwapPlanResult(plan=swap, prev_manifest=prev_manifest, next_manifest=next_manifest, buckets=buckets)
+    return SwapPlanResult(
+        plan=swap,
+        prev_manifest=prev_manifest,
+        next_manifest=next_manifest,
+        buckets=buckets,
+    )
 
 
 def _to_weight_manifest(manifest: dict) -> WeightManifest:

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "bstack"
 version = "0.1.0"
-description = "Umbrella integration repo for hotweights, BCache, datajax, and bw-runtime"
+description = "Umbrella integration repo for hotweights, BCache, datajax, and bstack-runtime"
 authors = [{ name = "The BStack authors" }]
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
